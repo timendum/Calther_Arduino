@@ -135,15 +135,16 @@ void PaperdinkUIDateClass::display_last_updated_time(GxEPD2_GFX& display,
                                                      uint16_t w) {
   int16_t xt, yt;
   uint16_t wt, ht, prev_height = 0, prev_width = 0;
-  char time_str[] = "Updated at: XX:XX";
+  char time_str[] = "@XX:XX";
 
   display.setFont(font);
   display.setTextColor(primary_color);
   display.setTextSize(1);
 
-  sprintf(&time_str[12], "%02d:%02d", mil_hour, min);
+  // Replace last 5 chars
+  sprintf(&time_str[strlen(time_str) - 5], "%02d:%02d", mil_hour, min);
   display.getTextBounds(time_str, 0, 0, &xt, &yt, &wt, &ht);
-  display.setCursor(x - wt, y - ht);
+  display.setCursor(x - wt - 1, y - ht);
   display.print(time_str);
 }
 

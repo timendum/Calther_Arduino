@@ -163,17 +163,8 @@ void UIJDataClass::display_list(GxEPD2_GFX& display,
                                 int16_t rows,
                                 uint16_t max_line_width) {
   int16_t xt, yt;
+  int8_t print_rows = 0;
   uint16_t wt, ht, char_ht, prev_height = y, prev_width = x;
-
-  // display.setFont(&PAPERDINK_FONT_LRG);
-  // display.setTextColor(primary_color);
-  // display.setTextSize(1);
-
-  // display.getTextBounds(F("Per oggi:"), 0, 0, &xt, &yt, &wt, &ht);
-  // display.setCursor(prev_width + 5, prev_height + ht);
-  // prev_height += ht;
-  // prev_width += 5;
-  // display.println(F("Per oggi:"));
 
   display.setFont(&PAPERDINK_FONT_MED);
   display.setTextColor(primary_color);
@@ -182,7 +173,7 @@ void UIJDataClass::display_list(GxEPD2_GFX& display,
   display.getTextBounds("W", 0, 0, &xt, &yt, &wt, &char_ht);
 
   // Display tasks
-  for (uint16_t i = 0; i < task_count && i < rows; i++) {
+  for (uint16_t i = 0; i < task_count && print_rows < rows; i++) {
     String task = tasks[i];
     uint16_t cnt = task.length();
     uint16_t tlength = cnt;
@@ -196,6 +187,7 @@ void UIJDataClass::display_list(GxEPD2_GFX& display,
       display.setCursor(prev_width, prev_height);
       display.printf("%s", task.c_str());
       prev_height += char_ht + 7;
+      print_rows += 1;
     } else {
       // Two rows
       DEBUG.printf("Task two line: %s\r\n", task.c_str());
@@ -208,6 +200,7 @@ void UIJDataClass::display_list(GxEPD2_GFX& display,
       display.setCursor(prev_width, prev_height);
       display.printf("%s", task.c_str());
       prev_height += char_ht + 7;
+      print_rows += 1;
       // Remaining
       task = tasks[i];
       task = String(" " + task.substring(cnt));
@@ -220,6 +213,7 @@ void UIJDataClass::display_list(GxEPD2_GFX& display,
       display.setCursor(prev_width, prev_height);
       display.printf("%s", task.c_str());
       prev_height += char_ht + 7;
+      print_rows += 1;
     }
   }
 }
