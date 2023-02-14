@@ -60,7 +60,8 @@ void update_screen() {
   Paperdink.epd.fillRect(0, 110, 400, 2, GxEPD_BLACK);
   display_datetime();
   display_weather();
-  
+  UIJData.display_moon(Paperdink.epd, 310, 20);
+
   /* Send data to display for the update */
   Paperdink.epd.display();
 }

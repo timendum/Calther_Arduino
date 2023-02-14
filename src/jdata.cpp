@@ -77,12 +77,14 @@ int8_t UIJDataClass::fetch_data() {
         // convert it to a JsonObject
         JsonObject root = json.as<JsonObject>();
         const char* min_max = root["weather"]["min_max"].as<const char*>();
-        if (strlen(min_max) < 5) {
+        if (strlen(min_max) < 4) {
           // small alignement
           snprintf(UIJData.min_max_temp, 10, " %s", min_max);
         } else {
           snprintf(UIJData.min_max_temp, 10, "%s", min_max);
         }
+        snprintf(UIJData.lunar_phase, 30, "%s",
+                 root["moon"]["txt"].as<const char*>());
         snprintf(UIJData.weather_string, 100, "%s",
                  root["weather"]["txt"].as<const char*>());
         JsonArray array = root["recurring"].as<JsonArray>();
@@ -204,7 +206,7 @@ void UIJDataClass::display_list(GxEPD2_GFX& display,
       // Remaining
       task = tasks[i];
       task = String(" " + task.substring(cnt));
-      DEBUG.printf("remains : %s\r\n", task.c_str());
+      DEBUG.printf("remains: %s\r\n", task.c_str());
       cnt = task.length();
       do {
         task = task.substring(0, cnt);
@@ -215,6 +217,35 @@ void UIJDataClass::display_list(GxEPD2_GFX& display,
       prev_height += char_ht + 7;
       print_rows += 1;
     }
+  }
+}
+
+void UIJDataClass::display_moon(GxEPD2_GFX& display, int16_t x, int16_t y) {
+  const uint8_t* moon_bitmap;
+  DEBUG.printf("Lunar phase: %s\r\n", lunar_phase);
+  if (!strcmp(lunar_phase, "NewMoon")) {
+    moon_bitmap = new_moon;
+  } else if (!strcmp(lunar_phase, "FirstQuarter")) {
+    moon_bitmap = moon_first_quarter;
+  } else if (!strcmp(lunar_phase, "FullMoon")) {
+    moon_bitmap = full_moon;
+  } else if (!strcmp(lunar_phase, "LastQuarter")) {
+    moon_bitmap = moon_last_quarter;
+  } else if (!strcmp(lunar_phase, "WaxingCrescent")) {
+    moon_bitmap = waxing_crescent;
+  } else if (!strcmp(lunar_phase, "WaxingGibbous")) {
+    moon_bitmap = waxing_gibbous;
+  } else if (!strcmp(lunar_phase, "WaningGibbous")) {
+    moon_bitmap = waning_gibbous;
+  } else if (!strcmp(lunar_phase, "WaningCrescent")) {
+    moon_bitmap = waning_crescent;
+  } else {
+    moon_bitmap = nullptr;
+  }
+
+  if (moon_bitmap != nullptr) {
+    display.drawBitmap(x, y, moon_bitmap, moon_width, moon_height,
+                       GxEPD_BLACK);
   }
 }
 

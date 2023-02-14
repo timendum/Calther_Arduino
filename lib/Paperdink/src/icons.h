@@ -30,5 +30,6 @@
 #include "icons/rain_xlrg.h"
 #include "icons/snow_xlrg.h"
 #include "icons/cloud_xlrg.h"
+#include "icons/moon.h"
 
 #endif /* _PAPERDINK_ICONS_H_ */
