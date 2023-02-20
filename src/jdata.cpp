@@ -131,7 +131,7 @@ void UIJDataClass::display_minmax(GxEPD2_GFX& display, uint16_t x, uint16_t y) {
   prev_width += thermometer_sml_width;
 
   display.getTextBounds("77", 0, 0, &xt, &yt, &wt, &ht);
-  display.setCursor(prev_width + 10, prev_height + ht + 2);
+  display.setCursor(prev_width + 7, prev_height + ht + 2);
   display.print(UIJData.min_max_temp);
 }
 

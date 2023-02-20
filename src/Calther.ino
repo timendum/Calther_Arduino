@@ -133,13 +133,13 @@ void display_weather() {
   UIJData.font = &Gobold_Thin9pt7b;
   UIJData.primary_color = GxEPD_BLACK;
 
-  UIJData.display_minmax(Paperdink.epd, 170 + 23, 11);
-  UIJData.display_weather_icon(Paperdink.epd, 170 + 20, 45, 90);
+  UIJData.display_minmax(Paperdink.epd, 10, 11);
+  UIJData.display_weather_icon(Paperdink.epd, 12, 45, 90);
 }
 
 void display_datetime() {
   /* Display background */
-  Paperdink.epd.fillRect(0, 0, 170 + 5, 110,
+  Paperdink.epd.fillRect(110, 0, 170 + 5, 110,
                          Paperdink.color);  // bottom colored rect
 
   /* Fetch date data */
@@ -151,7 +151,7 @@ void display_datetime() {
   Paperdink_Date.font = &PAPERDINK_FONT_LRG;
   Paperdink_Date.primary_color = GxEPD_WHITE;
   Paperdink_Date.secondary_color = GxEPD_BLACK;
-  Paperdink_Date.display_day_date(Paperdink.epd, 0, 5, 170);
+  Paperdink_Date.display_day_date(Paperdink.epd, 110, 5, 170);
   Paperdink_Date.font = &PAPERDINK_FONT_SML;
   Paperdink_Date.primary_color = GxEPD_BLACK;
   Paperdink_Date.secondary_color = GxEPD_WHITE;
