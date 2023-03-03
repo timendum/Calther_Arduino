@@ -24,7 +24,7 @@ void setup() {
       break;
   }
 
-  deep_sleep_timer_buttons_wakeup(0);
+  deep_sleep_timer_button_wakeup(0, BUTTON_1_PIN);
 }
 
 void update_screen() {
@@ -40,7 +40,7 @@ void update_screen() {
     Paperdink.epd.drawBitmap(370, 4, wifi_off_sml, wifi_off_sml_width,
                              wifi_off_sml_height, GxEPD_BLACK);
     Paperdink.epd.display();
-    deep_sleep_timer_buttons_wakeup(RETRY_SECONDS);
+    deep_sleep_timer_button_wakeup(RETRY_SECONDS, BUTTON_1_PIN);
     // retry in 10 minutes
     return;
   }
@@ -51,7 +51,7 @@ void update_screen() {
     Paperdink.epd.drawBitmap(370, 4, wifi_off_sml, wifi_off_sml_width,
                              wifi_off_sml_height, GxEPD_BLACK);
     Paperdink.epd.display();
-    deep_sleep_timer_buttons_wakeup(RETRY_SECONDS);
+    deep_sleep_timer_button_wakeup(RETRY_SECONDS, BUTTON_1_PIN);
     return;
   }
 
@@ -76,7 +76,7 @@ int get_GPIO_wake_up() {
   switch (wakeup_reason) {
     case ESP_SLEEP_WAKEUP_EXT0:
       DEBUG.println("Wakeup caused by external signal using RTC_IO");
-      break;
+      return -wakeup_reason;
     case ESP_SLEEP_WAKEUP_EXT1:
       DEBUG.println("Wakeup caused by external signal using RTC_CNTL");
       GPIO_reason = esp_sleep_get_ext1_wakeup_status();
@@ -88,15 +88,15 @@ int get_GPIO_wake_up() {
       break;
     case ESP_SLEEP_WAKEUP_TIMER:
       DEBUG.println("Wakeup caused by timer");
-      break;
+      return -wakeup_reason;
     default:
       DEBUG.printf("Wakeup was not caused by deep sleep: %d\n", wakeup_reason);
-      break;
+      return -wakeup_reason;
   }
   return 0;
 }
 
-// hex(2**14+2**17)  14=BUTTON_1_PIN, 27=BUTTON_2_PIN
+// hex(2**14+2**27+2**4+2**2) 14=BUTTON_1_PIN, 27=BUTTON_2_PIN
 #define BUTTON_PIN_BITMASK 0x8004014
 
 int8_t deep_sleep_timer_buttons_wakeup(uint64_t sleep_time) {
@@ -112,7 +112,7 @@ int8_t deep_sleep_timer_buttons_wakeup(uint64_t sleep_time) {
     sleep_time += 1;
   }
   DEBUG.println("Turning off everything");
-  delay(1000);
+  delay(3000);
   // Turn off everything
   Paperdink.disable_everything();
 
@@ -120,6 +120,33 @@ int8_t deep_sleep_timer_buttons_wakeup(uint64_t sleep_time) {
   esp_sleep_enable_ext1_wakeup((uint64_t)BUTTON_PIN_BITMASK,
                                ESP_EXT1_WAKEUP_ANY_HIGH);  // 1 = High, 0 = Low
   DEBUG.printf("Timer wakeup after %lld s or button", sleep_time);
+  // Go to sleep
+  esp_deep_sleep_start();
+
+  return 0;
+}
+
+int8_t deep_sleep_timer_button_wakeup(uint64_t sleep_time, uint8_t gpio_num) {
+  /* Sleep till update time.
+   * Align updates to 12am so that date change aligns
+   * with actual day change.
+   */
+  if (sleep_time < 1) {
+    sleep_time = (86400 / (UPDATES_PER_DAY)) -
+                 (((Paperdink_Date.mil_hour * 3600) +
+                   (Paperdink_Date.min * 60) + (Paperdink_Date.sec)) %
+                  (86400 / UPDATES_PER_DAY));
+    sleep_time += 1;
+  }
+  DEBUG.println("Turning off everything");
+  delay(3000);
+  // Turn off everything
+  Paperdink.disable_everything();
+
+  esp_sleep_enable_timer_wakeup(sleep_time * S_TO_uS_FACTOR);
+  esp_sleep_enable_ext0_wakeup((gpio_num_t)gpio_num, 0);  // 1 = High, 0 = Low
+  DEBUG.printf("Timer wakeup after %lld us or button on pin %d", sleep_time,
+               gpio_num);
   // Go to sleep
   esp_deep_sleep_start();
 
